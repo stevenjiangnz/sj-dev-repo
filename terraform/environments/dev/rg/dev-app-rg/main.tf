@@ -1,14 +1,18 @@
-locals {
-  name     = "dev-apps-ae-rg"
-  location = "australiaeast"
+module "resource_group" {
+  source = "../../../../modules/resource_group"
+  
+  resource_group_name = "dev-general-app-ae-rg"
+  location           = "australiaeast"
   tags = {
-    ManagedBy    = "Terragrunt"
-    Environment  = "dev"
+    Environment = "Development"
+    ManagedBy   = "Terragrunt"
   }
 }
 
-resource "azurerm_resource_group" "rg" {
-  name     = local.name
-  location = local.location
-  tags     = local.tags
+output "resource_group_id" {
+  value = module.resource_group.resource_group_id
+}
+
+output "resource_group_name" {
+  value = module.resource_group.resource_group_name
 }
