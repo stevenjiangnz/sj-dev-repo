@@ -1,0 +1,21 @@
+name: Hello World Action
+
+on: [push]
+
+jobs:
+  say-hello:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Say Hello
+        run: echo "Hello, GitHub Actions!"
+      
+      - name: Show When This Ran
+        run: date
+      
+      - name: Multiple Commands
+        run: |
+          echo "This is my first GitHub Action!"
+          echo "Current directory: $PWD"
+          echo "Let's list some files:"
+          ls -la
