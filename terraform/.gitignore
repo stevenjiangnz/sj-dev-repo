@@ -1,0 +1,21 @@
+# Local .terraform directories
+**/.terraform/*
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
+
+# Sensitive variables files
+*.tfvars
+*.tfvars.json
+
+# Lock files
+.terraform.lock.hcl
+
+# Crash log files
+crash.log
+crash.*.log
+
+**/backend.tf
+**/provider.tf
+**/.terragrunt-cache/
