@@ -78,7 +78,9 @@ jobs:
         working-directory: ${{ env.working-directory }}
         run: |
           ./python/simpler-logger/build/build.sh ${{ env.IMAGE_NAME}}
+          docker images -a
           docker image tag ${{ env.IMAGE_NAME}} ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME}}:latest
+          docker images -a
           docker image push ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME}}:latest
 
   tag_and_push:
