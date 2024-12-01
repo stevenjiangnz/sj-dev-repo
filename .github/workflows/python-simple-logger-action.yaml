@@ -10,14 +10,29 @@ on:
       - python/simpler-logger/**
   push:
     branches:
-      - main
+      - '*'  # Run on all branches
     paths:
       - .github/workflows/python-simple-logger-action.yaml
       - python/simpler-logger/**
 
 jobs:
-  tag_version:
+  dev_release:
     runs-on: ubuntu-latest
+    if: github.ref != 'refs/heads/main'  # Run on all branches except main
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - name: Display Version
+        run: |
+          echo "Development job run..."
+
+  tag_release:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'  # Only run on main branch
     env:
       VERSION_PREFIX: python-simpler-logger-
       LOG_PATH: python/simpler-logger
@@ -28,17 +43,8 @@ jobs:
           ref: ${{ github.head_ref }}
           fetch-depth: 0
 
-      - name: Git Version
+      - name: Get Version
         id: version
-        uses: codacy/git-version@2.5.4
-        with:
-          prefix: ${{ env.VERSION_PREFIX }}
-          log-path: ${{ env.LOG_PATH }}
-          release-branch: main
-          dev-branch: main
-
-      - name: Get Version2
-        id: version2
         shell: bash
         run: |
           VERSION=$(docker run -v $(pwd):/repo codacy/git-version /bin/git-version \
@@ -55,15 +61,13 @@ jobs:
 
       - name: Display Version
         run: |
-          echo "Current version: ${{ steps.version.outputs.version }}"
-          echo "Clean version: ${{ steps.version2.outputs.new-version }}"
+          echo "Clean version: ${{ steps.version.outputs.new-version }}"
 
       - name: Create and Push Tag
-        if: github.ref == 'refs/heads/main'
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-          git tag -a ${{ steps.version2.outputs.new-version }} -m "Release ${{ steps.version2.outputs.new-version }}"
-          git push origin ${{ steps.version2.outputs.new-version }}
+          git tag -a ${{ steps.version.outputs.new-version }} -m "Release ${{ steps.version.outputs.new-version }}"
+          git push origin ${{ steps.version.outputs.new-version }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
