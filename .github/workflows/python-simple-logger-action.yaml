@@ -135,34 +135,15 @@ jobs:
           docker images -a 
           docker image push ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME}}:${{ steps.version.outputs.docker-tag }}
 
-      # - name: Build and Push Docker image
-      #   uses: docker/build-push-action@v4
-      #   with:
-      #     context: .
-      #     file: ./Dockerfile
-      #     push: true
-      #     tags: |
-      #       ${{ env.DOCKER_IMAGE }}:latest
-      #       ${{ env.DOCKER_IMAGE }}:${{ steps.version.outputs.docker-tag }}
-
-      # - name: Create and Push Git Tag
-      #   run: |
-      #     git config user.name github-actions
-      #     git config user.email github-actions@github.com
-      #     git tag -a ${{ steps.version.outputs.new-version }} -m "Release ${{ steps.version.outputs.new-version }}"
-      #     git push origin ${{ steps.version.outputs.new-version }}
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      # - name: Create Release
-      #   uses: softprops/action-gh-release@v1
-      #   with:
-      #     tag_name: ${{ steps.version.outputs.new-version }}
-      #     name: Release ${{ steps.version.outputs.new-version }}
-      #     generate_release_notes: true
-      #     body: |
-      #       Docker image has been pushed to Docker Hub:
-      #       - `${{ env.DOCKER_IMAGE }}:latest`
-      #       - `${{ env.DOCKER_IMAGE }}:${{ steps.version.outputs.docker-tag }}`
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.version.outputs.new-version }}
+          name: Release ${{ steps.version.outputs.new-version }}
+          generate_release_notes: true
+          body: |
+            Docker image has been pushed to Docker Hub:
+            - `${{ env.DOCKER_IMAGE }}:latest`
+            - `${{ env.DOCKER_IMAGE }}:${{ steps.version.outputs.docker-tag }}`
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
