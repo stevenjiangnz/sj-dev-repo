@@ -1,4 +1,4 @@
-name: simple logger action
+name: Logger Action with Docker
 
 permissions:
   contents: write
@@ -8,17 +8,51 @@ on:
     paths:
       - .github/workflows/python-simple-logger-action.yaml
       - python/simpler-logger/**
+      - Dockerfile
+      - build/**
   push:
     branches:
-      - '*'  # Run on all branches
+      - '*'
     paths:
       - .github/workflows/python-simple-logger-action.yaml
       - python/simpler-logger/**
+      - Dockerfile
+      - build/**
+env: 
+  IMAGE_NAME: simpler-logger
 
 jobs:
-  dev_release:
+  validate:
     runs-on: ubuntu-latest
-    if: github.ref != 'refs/heads/main'  # Run on all branches except main
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      # - name: Install dependencies
+      #   run: |
+      #     python -m pip install --upgrade pip
+      #     if [ -f python/simpler-logger/requirements.txt ]; then
+      #       pip install -r python/simpler-logger/requirements.txt
+      #     fi
+      #     pip install pytest
+
+      # - name: Run tests
+      #   run: |
+      #     if [ -d python/simpler-logger/tests ]; then
+      #       pytest python/simpler-logger/tests/
+      #     fi
+
+  dev_release:
+    needs: validate
+    runs-on: ubuntu-latest
+    if: github.ref != 'refs/heads/main'
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -26,21 +60,45 @@ jobs:
           ref: ${{ github.head_ref }}
           fetch-depth: 0
 
-      - name: Display Version
+      - name: Display Branch Info
         run: |
-          echo "Development job run..."
+          echo "Development job running on branch: ${GITHUB_REF#refs/heads/}"
+          echo "Commit SHA: ${{ github.sha }}"
 
-  tag_release:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        working-directory: ${{ env.working-directory }}
+        run: |
+          ./python/simpler-logger/build/build.sh ${{ env.IMAGE_NAME}}
+
+          docker image tag ${{ env.IMAGE_NAME}} ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME}}:latest
+          docker image push ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME}}:latest
+
+          docker image tag ${{ env.IMAGE_NAME}} ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME}}:dev-${{github.run_number}}
+          docker image push ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME}}:dev-${{github.run_number}}
+
+  tag_and_push:
+    needs: validate
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'  # Only run on main branch
+    if: github.ref == 'refs/heads/main'
     env:
       VERSION_PREFIX: python-simpler-logger-
       LOG_PATH: python/simpler-logger
+      DOCKER_IMAGE: your-dockerhub-username/simple-logger  # Replace with your Docker Hub username
+    outputs:
+      new_version: ${{ steps.version.outputs.new-version }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
         with:
-          ref: ${{ github.head_ref }}
           fetch-depth: 0
 
       - name: Get Version
@@ -52,22 +110,58 @@ jobs:
             --version-prefix ${{ env.VERSION_PREFIX }} \
             --release-branch main)
           
-          # Extract version number and combine with prefix
           CLEAN_VERSION="${{ env.VERSION_PREFIX }}$(echo $VERSION | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')"
+          DOCKER_TAG="$(echo $VERSION | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')"
           
           echo "new-version=$CLEAN_VERSION" >> $GITHUB_OUTPUT
+          echo "docker-tag=$DOCKER_TAG" >> $GITHUB_OUTPUT
           echo "New Version: $CLEAN_VERSION"
-          echo "Raw Version: $VERSION"
+          echo "Docker Tag: $DOCKER_TAG"
 
-      - name: Display Version
-        run: |
-          echo "Clean version: ${{ steps.version.outputs.new-version }}"
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
-      - name: Create and Push Tag
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        working-directory: ${{ env.working-directory }}
         run: |
-          git config user.name github-actions
-          git config user.email github-actions@github.com
-          git tag -a ${{ steps.version.outputs.new-version }} -m "Release ${{ steps.version.outputs.new-version }}"
-          git push origin ${{ steps.version.outputs.new-version }}
+          ./python/simpler-logger/build/build.sh ${{ env.IMAGE_NAME}}
+          docker image tag ${{ env.IMAGE_NAME}} ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME}}:${{ steps.version.outputs.docker-tag }}
+          docker image push ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME}}:${{ steps.version.outputs.docker-tag }}
+
+      # - name: Build and Push Docker image
+      #   uses: docker/build-push-action@v4
+      #   with:
+      #     context: .
+      #     file: ./Dockerfile
+      #     push: true
+      #     tags: |
+      #       ${{ env.DOCKER_IMAGE }}:latest
+      #       ${{ env.DOCKER_IMAGE }}:${{ steps.version.outputs.docker-tag }}
+
+      # - name: Create and Push Git Tag
+      #   run: |
+      #     git config user.name github-actions
+      #     git config user.email github-actions@github.com
+      #     git tag -a ${{ steps.version.outputs.new-version }} -m "Release ${{ steps.version.outputs.new-version }}"
+      #     git push origin ${{ steps.version.outputs.new-version }}
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # - name: Create Release
+      #   uses: softprops/action-gh-release@v1
+      #   with:
+      #     tag_name: ${{ steps.version.outputs.new-version }}
+      #     name: Release ${{ steps.version.outputs.new-version }}
+      #     generate_release_notes: true
+      #     body: |
+      #       Docker image has been pushed to Docker Hub:
+      #       - `${{ env.DOCKER_IMAGE }}:latest`
+      #       - `${{ env.DOCKER_IMAGE }}:${{ steps.version.outputs.docker-tag }}`
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
