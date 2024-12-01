@@ -16,8 +16,11 @@ on:
       - python/simpler-logger/**
 
 jobs:
-  lint:
+  tag_version:
     runs-on: ubuntu-latest
+    env:
+      VERSION_PREFIX: python-simpler-logger-
+      LOG_PATH: python/simpler-logger
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -29,8 +32,8 @@ jobs:
         id: version
         uses: codacy/git-version@2.5.4
         with:
-          prefix: python-simpler-logger-
-          log-path: python/simpler-logger
+          prefix: ${{ env.VERSION_PREFIX }}
+          log-path: ${{ env.LOG_PATH }}
           release-branch: main
           dev-branch: main
 
@@ -40,11 +43,11 @@ jobs:
         run: |
           VERSION=$(docker run -v $(pwd):/repo codacy/git-version /bin/git-version \
             --folder /repo \
-            --version-prefix python-simpler-logger- \
+            --version-prefix ${{ env.VERSION_PREFIX }} \
             --release-branch main)
           
           # Extract version number and combine with prefix
-          CLEAN_VERSION="python-simpler-logger-$(echo $VERSION | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')"
+          CLEAN_VERSION="${{ env.VERSION_PREFIX }}$(echo $VERSION | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')"
           
           echo "new-version=$CLEAN_VERSION" >> $GITHUB_OUTPUT
           echo "New Version: $CLEAN_VERSION"
