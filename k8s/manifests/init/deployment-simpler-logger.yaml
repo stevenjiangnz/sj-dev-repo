@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simpler-logger
+  namespace: ai
+  labels:
+    app: simpler-logger
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: simpler-logger
+  template:
+    metadata:
+      labels:
+        app: simpler-logger
+    spec:
+      containers:
+      - name: simpler-logger
+        image: stevenjiangnz/simpler-logger:latest
+        imagePullPolicy: Always
