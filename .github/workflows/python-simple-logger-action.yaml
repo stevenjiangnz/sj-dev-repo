@@ -33,6 +33,17 @@ jobs:
           prefix: python-simpler-logger
           log-path: python/simpler-logger
 
+      - name: Get Version2
+        id: version
+        shell: bash
+        run: |
+          export VERSION=$(docker run -v $(pwd):/repo codacy/git-version /bin/git-version \
+            --folder /repo \
+            --release-branch main)
+
+          echo "::set-output name=new-version::$VERSION"
+          echo "New Version: $VERSION"
+
       - name: Display Version
         run: |
           echo "Current version: ${{ steps.version.outputs.version }}"
