@@ -62,6 +62,7 @@ jobs:
         run: |
           echo "Development job running on branch: ${GITHUB_REF#refs/heads/}"
           echo "Commit SHA: ${{ github.sha }}"
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
@@ -70,6 +71,13 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        working-directory: ${{ env.working-directory }}
+        run: |
+          pwd
+          ls -la
+
 
   tag_and_push:
     needs: validate
