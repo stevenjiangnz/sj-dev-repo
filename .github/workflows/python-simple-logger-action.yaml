@@ -53,7 +53,7 @@ jobs:
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-          tag_name: ${{ steps.version2.outputs.new-version }}
+          git tag ${{ steps.version2.outputs.new-version }}
           release_name: Release ${{ steps.version2.outputs.new-version }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
