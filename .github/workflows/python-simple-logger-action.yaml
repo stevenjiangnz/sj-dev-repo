@@ -38,13 +38,13 @@ jobs:
         id: version2
         shell: bash
         run: |
-          export VERSION=$(docker run -v $(pwd):/repo codacy/git-version /bin/git-version \
+          VERSION=$(docker run -v $(pwd):/repo codacy/git-version /bin/git-version \
             --folder /repo \
             --prefix python-simpler-logger- \
             --release-branch main)
           
-          # Extract version number but keep the prefix
-          CLEAN_VERSION="python-simpler-logger-$(echo $VERSION | sed -E 's/([0-9]+\.[0-9]+\.[0-9]+).*/\1/')"
+          # Extract version number and combine with prefix
+          CLEAN_VERSION="python-simpler-logger-$(echo $VERSION | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')"
           
           echo "new-version=$CLEAN_VERSION" >> $GITHUB_OUTPUT
           echo "New Version: $CLEAN_VERSION"
