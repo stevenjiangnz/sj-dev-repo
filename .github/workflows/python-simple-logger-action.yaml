@@ -4,26 +4,54 @@ on:
   pull_request:
     paths:
       - .github/workflows/python-simple-logger-action.yaml
-      - python/**
+      - python/simpler-logger/**
   push:
     paths:
       - .github/workflows/python-simple-logger-action.yaml
-      - python/**
+      - python/simpler-logger/**
 
 jobs:
-  say-hello:
+  lint:
     runs-on: ubuntu-latest
-    
     steps:
-      - name: Say Hello
-        run: echo "Hello, GitHub Actions!"
-      
-      - name: Show When This Ran
-        run: date
-      
-      - name: Multiple Commands
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}   # checkout the correct branch name
+          fetch-depth: 0                # fetch the whole repo history
+
+      - name: Git Version
+        uses: codacy/git-version@2.5.4
+        with:
+          prefix: python-simpler-logger
+          log-path: python/simpler-logger
+
+      - name: Display Version
         run: |
-          echo "This is my first GitHub Action!"
-          echo "Current directory: $PWD"
-          echo "Let's list some files:"
-          ls -la
+          echo "Current version: ${{ steps.version.outputs.version }}"
+
+      - name: Create Tag
+        if: github.ref == 'refs/heads/main'
+        run: |
+          git tag ${{ steps.version.outputs.version }}
+          git push origin ${{ steps.version.outputs.version }}
+
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # say-hello:
+  #   runs-on: ubuntu-latest
+    
+  #   steps:
+  #     - name: Say Hello
+  #       run: echo "Hello, GitHub Actions!"
+      
+  #     - name: Show When This Ran
+  #       run: date
+      
+  #     - name: Multiple Commands
+  #       run: |
+  #         echo "This is my first GitHub Action!"
+  #         echo "Current directory: $PWD"
+  #         echo "Let's list some files:"
+  #         ls -la
