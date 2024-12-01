@@ -1,6 +1,14 @@
 name: simple logger action
 
-on: [push]
+on: 
+  pull_request:
+    paths:
+      - .github/workflows/python-simple-logger-action.yaml
+      - python/**
+  push:
+    paths:
+      - .github/workflows/python-simple-logger-action.yaml
+      - python/**
 
 jobs:
   say-hello:
