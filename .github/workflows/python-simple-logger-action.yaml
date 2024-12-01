@@ -34,7 +34,7 @@ jobs:
           log-path: python/simpler-logger
 
       - name: Get Version2
-        id: version
+        id: version2
         shell: bash
         run: |
           export VERSION=$(docker run -v $(pwd):/repo codacy/git-version /bin/git-version \
