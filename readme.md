@@ -6,4 +6,4 @@ minikube mount /mnt/data/k8s:/mnt/data/k8s
 
 note: a terminal is required to keep open in order to map the host folder and minikube pv
 
-this should not trigger python 123
+this should not trigger python 124
