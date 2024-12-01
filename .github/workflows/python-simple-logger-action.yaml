@@ -1,11 +1,17 @@
 name: simple logger action
 
+# Add permissions block at the top level
+permissions:
+  contents: write    # This gives permission to push tags
+
 on: 
   pull_request:
     paths:
       - .github/workflows/python-simple-logger-action.yaml
       - python/simpler-logger/**
   push:
+    branches:
+      - main
     paths:
       - .github/workflows/python-simple-logger-action.yaml
       - python/simpler-logger/**
@@ -17,10 +23,11 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
         with:
-          ref: ${{ github.head_ref }}   # checkout the correct branch name
-          fetch-depth: 0                # fetch the whole repo history
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
 
       - name: Git Version
+        id: version
         uses: codacy/git-version@2.5.4
         with:
           prefix: python-simpler-logger
@@ -33,25 +40,9 @@ jobs:
       - name: Create Tag
         if: github.ref == 'refs/heads/main'
         run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
           git tag ${{ steps.version.outputs.version }}
           git push origin ${{ steps.version.outputs.version }}
-
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  # say-hello:
-  #   runs-on: ubuntu-latest
-    
-  #   steps:
-  #     - name: Say Hello
-  #       run: echo "Hello, GitHub Actions!"
-      
-  #     - name: Show When This Ran
-  #       run: date
-      
-  #     - name: Multiple Commands
-  #       run: |
-  #         echo "This is my first GitHub Action!"
-  #         echo "Current directory: $PWD"
-  #         echo "Let's list some files:"
-  #         ls -la
