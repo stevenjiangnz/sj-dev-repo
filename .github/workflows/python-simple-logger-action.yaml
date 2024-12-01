@@ -20,7 +20,6 @@ on:
       - build/**
 env: 
   IMAGE_NAME: simpler-logger
-  DOCKERHUB_NAME: stevenjiangnz
 
 jobs:
   validate:
@@ -80,11 +79,11 @@ jobs:
         run: |
           ./python/simpler-logger/build/build.sh ${{ env.IMAGE_NAME}}
 
-          docker image tag ${{ env.IMAGE_NAME}} ${{ env.DOCKERHUB_NAME }}/${{ env.IMAGE_NAME}}:latest
-          docker image push ${{ env.DOCKERHUB_NAME }}/${{ env.IMAGE_NAME}}:latest
+          docker image tag ${{ env.IMAGE_NAME}} ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME}}:latest
+          docker image push ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME}}:latest
 
-          docker image tag ${{ env.IMAGE_NAME}} ${{ env.DOCKERHUB_NAME }}/${{ env.IMAGE_NAME}}:dev-${{github.run_number}}
-          docker image push ${{ env.DOCKERHUB_NAME }}/${{ env.IMAGE_NAME}}:dev-${{github.run_number}}
+          docker image tag ${{ env.IMAGE_NAME}} ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME}}:dev-${{github.run_number}}
+          docker image push ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME}}:dev-${{github.run_number}}
 
   tag_and_push:
     needs: validate
@@ -132,9 +131,9 @@ jobs:
         working-directory: ${{ env.working-directory }}
         run: |
           ./python/simpler-logger/build/build.sh ${{ env.IMAGE_NAME}}
-          docker image tag ${{ env.IMAGE_NAME}} ${{ env.DOCKERHUB_NAME }}/${{ env.IMAGE_NAME}}:${{ steps.version.outputs.docker-tag }}
+          docker image tag ${{ env.IMAGE_NAME}} ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME}}:${{ steps.version.outputs.docker-tag }}
           docker images -a 
-          docker image push ${{ env.DOCKERHUB_NAME }}/${{ env.IMAGE_NAME}}:${{ steps.version.outputs.docker-tag }}
+          docker image push ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME}}:${{ steps.version.outputs.docker-tag }}
 
       # - name: Build and Push Docker image
       #   uses: docker/build-push-action@v4
