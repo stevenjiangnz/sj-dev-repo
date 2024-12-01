@@ -26,6 +26,18 @@ jobs:
           prefix: python-simpler-logger
           log-path: python/simpler-logger
 
+      - name: Display Version
+        run: |
+          echo "Current version: ${{ steps.version.outputs.version }}"
+
+      - name: Create Tag
+        if: github.ref == 'refs/heads/main'
+        run: |
+          git tag ${{ steps.version.outputs.version }}
+          git push origin ${{ steps.version.outputs.version }}
+
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   # say-hello:
   #   runs-on: ubuntu-latest
