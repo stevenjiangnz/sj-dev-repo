@@ -53,7 +53,7 @@ jobs:
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-          git tag ${{ steps.version2.outputs.new-version }}
-          # release_name: Release ${{ steps.version2.outputs.new-version }}
+          git tag -a v${{ steps.version2.outputs.new-version }} -m "Release version ${{ steps.version2.outputs.new-version }}"
+          git push origin v${{ steps.version2.outputs.new-version }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
