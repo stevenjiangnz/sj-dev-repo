@@ -77,6 +77,8 @@ jobs:
         run: |
           pwd
           ls -la
+          ./python/simpler-logger/build/build.sh simpler-logger-image
+          docker images -a
 
 
   tag_and_push:

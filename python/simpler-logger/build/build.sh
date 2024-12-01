@@ -1,5 +1,3 @@
-build/build.sh
-
 #!/bin/bash
 
 # Navigate to the directory containing this script
