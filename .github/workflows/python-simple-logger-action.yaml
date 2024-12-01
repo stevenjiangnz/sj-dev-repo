@@ -11,19 +11,35 @@ on:
       - python/simpler-logger/**
 
 jobs:
-  say-hello:
+  lint:
     runs-on: ubuntu-latest
-    
     steps:
-      - name: Say Hello
-        run: echo "Hello, GitHub Actions!"
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}   # checkout the correct branch name
+          fetch-depth: 0                # fetch the whole repo history
+
+      - name: Git Version
+        uses: codacy/git-version@2.5.4
+        with:
+          prefix: python-simpler-logger
+          log-path: python/simpler-logger
+
+
+  # say-hello:
+  #   runs-on: ubuntu-latest
+    
+  #   steps:
+  #     - name: Say Hello
+  #       run: echo "Hello, GitHub Actions!"
       
-      - name: Show When This Ran
-        run: date
+  #     - name: Show When This Ran
+  #       run: date
       
-      - name: Multiple Commands
-        run: |
-          echo "This is my first GitHub Action!"
-          echo "Current directory: $PWD"
-          echo "Let's list some files:"
-          ls -la
+  #     - name: Multiple Commands
+  #       run: |
+  #         echo "This is my first GitHub Action!"
+  #         echo "Current directory: $PWD"
+  #         echo "Let's list some files:"
+  #         ls -la
