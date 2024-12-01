@@ -40,7 +40,7 @@ jobs:
         run: |
           VERSION=$(docker run -v $(pwd):/repo codacy/git-version /bin/git-version \
             --folder /repo \
-            --prefix python-simpler-logger- \
+            --version-prefix python-simpler-logger- \
             --release-branch main)
           
           # Extract version number and combine with prefix
