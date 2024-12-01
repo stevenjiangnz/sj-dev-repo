@@ -18,6 +18,8 @@ on:
       - python/simpler-logger/**
       - Dockerfile
       - build/**
+env: 
+  IMAGE_NAME: simpler-logger-image
 
 jobs:
   validate:
@@ -75,11 +77,9 @@ jobs:
       - name: Build and push Docker image
         working-directory: ${{ env.working-directory }}
         run: |
-          pwd
-          ls -la
-          ./python/simpler-logger/build/build.sh simpler-logger-image
-          docker images -a
-
+          ./python/simpler-logger/build/build.sh ${{ env.IMAGE_NAME}}
+          docker image tag ${{ env.IMAGE_NAME}} ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME}}:latest
+          docker image push ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME}}:latest
 
   tag_and_push:
     needs: validate
