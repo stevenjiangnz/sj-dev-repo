@@ -3,11 +3,11 @@ name: simple logger action
 on: 
   pull_request:
     paths:
-      - .github/workflows/python/simple-logger-action.yaml
+      - .github/workflows/python-simple-logger-action.yaml
       - python/**
   push:
     paths:
-      - .github/workflows/python/simple-logger-action.yaml
+      - .github/workflows/python-simple-logger-action.yaml
       - python/**
 
 jobs:
