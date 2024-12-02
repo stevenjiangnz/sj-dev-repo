@@ -4,3 +4,10 @@ metadata:
   name: ai
   labels:
     name: ai
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: elk
+  labels:
+    name: elk
